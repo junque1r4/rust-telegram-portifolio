@@ -142,6 +142,42 @@ async fn back_button() -> InlineKeyboardMarkup {
     InlineKeyboardMarkup::new(keyboard)
 }
 
+async fn jobs_button() -> InlineKeyboardMarkup {
+    let mut keyboard: Vec<Vec<InlineKeyboardButton>> = vec![];
+    let callback_buttons = [
+        "Alelo", "Vivo", "Assaí", "Freelancers", "Back"
+    ];
+
+    for buttons in callback_buttons.chunks(2) {
+        let row = buttons
+            .iter()
+            .map(| &button | InlineKeyboardButton::callback(button.to_owned(), button.to_owned()))
+            .collect();
+    
+        keyboard.push(row);
+    }
+
+    InlineKeyboardMarkup::new(keyboard)
+}
+
+async fn skills_button() -> InlineKeyboardMarkup {
+    let mut keyboard: Vec<Vec<InlineKeyboardButton>> = vec![];
+    let callback_buttons = [
+        "Rust", "Python", "Kotlin", "Java", "Cybersecurity", "Back",
+    ];
+
+    for button in callback_buttons.chunks(2) {
+        let row = button
+            .iter()
+            .map(| &button | InlineKeyboardButton::callback(button.to_owned(), button.to_owned()))
+            .collect();
+
+        keyboard.push(row);
+    }
+
+    InlineKeyboardMarkup::new(keyboard)
+}
+
 async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Error + Send + Sync>> {
     if let Some(option) = q.data {
         let text = format!("You chose: {option}");
@@ -181,6 +217,19 @@ Follow me on X, i'm trying to post some things! 🤝")
                         .reply_markup(social_media_buttons().await)
                         .await?;
                 },
+                "jobs" => {
+                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each company!")
+                        .parse_mode(ParseMode::Markdown)
+                        .reply_markup(jobs_button().await)
+                        .await?;
+                },
+                "skills" => {
+                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each skill!")
+                        .parse_mode(ParseMode::Markdown)
+                        .reply_markup(skills_button().await)
+                        .await?;
+                }
+
                 _ => {
                     bot.send_message(chat.id, text).await?;
                 }
