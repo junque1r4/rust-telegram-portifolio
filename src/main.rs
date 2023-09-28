@@ -1,4 +1,5 @@
 use std::error::Error;
+use serde::{Serialize, Deserialize};
 use teloxide::{
     prelude::*,
     types::{
@@ -7,7 +8,14 @@ use teloxide::{
     },
     utils::command::BotCommands,
 };
+use std::fs::File;
+use std::io::Read;
 use url::Url;
+#[derive(Debug, Serialize, Deserialize)]
+struct Messages {
+    about: String
+}
+
 
 #[derive(BotCommands)]
 #[command(rename_rule = "lowercase", description = "These commands are supported:")]
@@ -17,7 +25,7 @@ enum Command {
     #[command(description = "Show the main menu")]
     Start,
 }
-// Can i create a struct or constant to store all strings and texts so i can edit them easily? Make the bot easy to share
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -181,6 +189,9 @@ async fn skills_button() -> InlineKeyboardMarkup {
 async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Error + Send + Sync>> {
     if let Some(option) = q.data {
         let text = format!("You chose: {option}");
+
+
+
         bot.answer_callback_query(q.id).await?;
 
         // These giant strings are kinda ugly, 
@@ -188,15 +199,15 @@ async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Erro
         if let Some(Message { id, chat, .. }) = q.message {
             match option.to_lowercase().as_str() {
                 "about me" => {
-                    let about_me = "
-[ㅤ](https://www.jokesforfunny.com/wp-content/uploads/2021/06/0596bdb89b60fe771acd2f5972a9d3e3-1158x1536.jpg)	
-I'm a 24 years old Cybersecurity Analyst from Brazil. I'm currently working at [Alelo](https://www.alelo.com.br)
+                    // Opening a file every time someone click this button? Bad bad practice...
+                    let mut file = File::open("data.json".to_owned()).expect("Failed to open file.");
+                    let mut json_string = String::new();
+                    file.read_to_string(&mut json_string)
+                        .expect("Failed to read file.");
 
-I don't have a degree because i quit in the last semester of my Computer Science course, because i was planning to move to another country. ( Political and Economic reasons )
+                    let msg: Result<Messages, serde_json::Error> = serde_json::from_str(&json_string);
 
-I'm currently studying backend development in Rust! This bot was implemented using the [Teloxide](https://github.com/teloxide/teloxide) library and Rust!
-
-If you want to know more about my skills you can select \"Skills\" in the main menu.";
+                    let about_me = msg.unwrap().about;
                     bot.edit_message_text(chat.id, id, about_me)
                     .parse_mode(ParseMode::Markdown)
                     .reply_markup( back_button().await ) // back button
