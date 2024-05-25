@@ -1,3 +1,5 @@
+mod infos;
+
 use std::error::Error;
 use teloxide::{
     prelude::*,
@@ -8,6 +10,9 @@ use teloxide::{
     utils::command::BotCommands,
 };
 use url::Url;
+use json;
+use serde_json::error::Category::Data;
+
 
 #[derive(BotCommands)]
 #[command(rename_rule = "lowercase", description = "These commands are supported:")]
@@ -17,6 +22,7 @@ enum Command {
     #[command(description = "Show the main menu")]
     Start,
 }
+
 // Can i create a struct or constant to store all strings and texts so i can edit them easily? Make the bot easy to share
 
 #[tokio::main]
@@ -182,7 +188,6 @@ async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Erro
     if let Some(option) = q.data {
         let text = format!("You chose: {option}");
         bot.answer_callback_query(q.id).await?;
-
         // These giant strings are kinda ugly, 
         // TODO: Improve string formatting and store in a struct or constant
         if let Some(Message { id, chat, .. }) = q.message {
