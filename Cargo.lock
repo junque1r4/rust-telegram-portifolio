@@ -923,6 +923,7 @@ name = "rust-telegram-portifolio"
 version = "0.1.0"
 dependencies = [
  "json",
+ "lazy_static",
  "log",
  "pretty_env_logger",
  "serde",

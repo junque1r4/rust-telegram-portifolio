@@ -1,5 +1,3 @@
-mod infos;
-
 use std::error::Error;
 use teloxide::{
     prelude::*,
@@ -12,6 +10,10 @@ use teloxide::{
 use url::Url;
 use json;
 use serde_json::error::Category::Data;
+use std::fs::File;
+use std::io::Read;
+use serde::Deserialize;
+use lazy_static::lazy_static;
 
 
 #[derive(BotCommands)]
@@ -23,7 +25,25 @@ enum Command {
     Start,
 }
 
-// Can i create a struct or constant to store all strings and texts so i can edit them easily? Make the bot easy to share
+#[derive(Deserialize)]
+struct Config {
+    about_me: String,
+    welcome_message: String,
+    social_media: String,
+    jobs: String,
+    skills: String,
+}
+
+fn load_config() -> Config {
+    let mut file = File::open("config.json").expect("File not found");
+    let mut data = String::new();
+    file.read_to_string(&mut data).expect("Unable to read file");
+    serde_json::from_str(&data).expect("JSON was not well-formatted")
+}
+
+lazy_static! {
+    static ref CONFIG: Config = load_config();
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -187,24 +207,15 @@ async fn skills_button() -> InlineKeyboardMarkup {
 async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Error + Send + Sync>> {
     if let Some(option) = q.data {
         let text = format!("You chose: {option}");
+
+        let config = load_config();
         bot.answer_callback_query(q.id).await?;
-        // These giant strings are kinda ugly, 
-        // TODO: Improve string formatting and store in a struct or constant
         if let Some(Message { id, chat, .. }) = q.message {
             match option.to_lowercase().as_str() {
                 "about me" => {
-                    let about_me = "
-[ㅤ](https://www.jokesforfunny.com/wp-content/uploads/2021/06/0596bdb89b60fe771acd2f5972a9d3e3-1158x1536.jpg)	
-I'm a 24 years old Cybersecurity Analyst from Brazil. I'm currently working at [Alelo](https://www.alelo.com.br)
-
-I don't have a degree because i quit in the last semester of my Computer Science course, because i was planning to move to another country. ( Political and Economic reasons )
-
-I'm currently studying backend development in Rust! This bot was implemented using the [Teloxide](https://github.com/teloxide/teloxide) library and Rust!
-
-If you want to know more about my skills you can select \"Skills\" in the main menu.";
-                    bot.edit_message_text(chat.id, id, about_me)
+                    bot.edit_message_text(chat.id, id, &CONFIG.about_me)
                     .parse_mode(ParseMode::Markdown)
-                    .reply_markup( back_button().await ) // back button
+                    .reply_markup( back_button().await )
                     .await?;
                 },
                 "back" => {
@@ -214,10 +225,7 @@ If you want to know more about my skills you can select \"Skills\" in the main m
                         .await?;
                 },
                 "social media" => {
-                    bot.edit_message_text(chat.id, id, "
-Social Media!
-
-Follow me on X, i'm trying to post some things! 🤝")
+                    bot.edit_message_text(chat.id, id, &config.social_media)
                         .parse_mode(ParseMode::Markdown)
                         .reply_markup(social_media_buttons().await)
                         .await?;

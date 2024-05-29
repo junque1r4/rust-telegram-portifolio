@@ -1,0 +1,7 @@
+{
+  "about_me": "[ㅤ](https://www.jokesforfunny.com/wp-content/uploads/2021/06/0596bdb89b60fe771acd2f5972a9d3e3-1158x1536.jpg)\nI'm a 24 years old Cybersecurity Analyst from Brazil. I'm currently working at [Alelo](https://www.alelo.com.br)\n\nI don't have a degree because i quit in the last semester of my Computer Science course, because i was planning to move to another country. ( Political and Economic reasons )\n\nI'm currently studying backend development in Rust! This bot was implemented using the [Teloxide](https://github.com/teloxide/teloxide) library and Rust!\n\nIf you want to know more about my skills you can select \\\"Skills\\\" in the main menu.\"",
+  "welcome_message": "rust",
+  "social_media": "Social Media!\n\nFollow me on X, i'm trying to post some things! \uD83E\uDD1D",
+  "jobs": "rust",
+  "skills": "rust"
+}
