@@ -25,13 +25,15 @@ enum Command {
     Start,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct Config {
+    home: String,
     about_me: String,
     welcome_message: String,
     social_media: String,
     jobs: String,
     skills: String,
+    github_bot_url: String,
 }
 
 fn load_config() -> Config {
@@ -61,34 +63,36 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn create_inline_keyboard_rows(buttons: &[&str], chunk_size: usize) -> Vec<Vec<InlineKeyboardButton>> {
+    let mut keyboard = Vec::new();
+    for chunk in buttons.chunks(chunk_size) {
+        let row: Vec<InlineKeyboardButton> = chunk
+            .iter()
+            .map(|&button| InlineKeyboardButton::callback(button.to_owned(), button.to_owned()))
+            .collect();
+        keyboard.push(row);
+    }
+    keyboard
+}
+
+fn add_url_buttons(keyboard: &mut Vec<Vec<InlineKeyboardButton>>, buttons: &[(&str, &str)]) {
+    for (label, url_str) in buttons {
+        let url = Url::parse(url_str).unwrap();
+        keyboard.push(vec![InlineKeyboardButton::url(label.to_string(), url)]);
+    }
+}
+
 fn home_keyboard() -> InlineKeyboardMarkup {
-    let mut keyboard: Vec<Vec<InlineKeyboardButton>> = vec![];
-    let github_bot_url = Url::parse("https://github.com/junque1r4/rust-telegram-portifolio").unwrap();
-
-
     let callback_buttons = [
         "About me", "Jobs", "Social Media", "Skills",
     ];
 
-    let url_buttons = [
-        "Bot Repository"
+    let url_buttons = vec![
+        ("Github", "https://github.com/junque1r4/rust-telegram-portifolio")
     ];
 
-    for buttons in callback_buttons.chunks(2) {
-        let row = buttons
-            .iter()
-            .map(|&button| InlineKeyboardButton::callback(button.to_owned(), button.to_owned()))
-            .collect();
-
-        keyboard.push(row);
-    }
-
-    url_buttons.iter().for_each(|&button| {
-        keyboard.push(vec![InlineKeyboardButton::url(
-            button.to_owned(),
-            github_bot_url.to_owned(),
-        )])
-    });
+    let mut keyboard: Vec<Vec<InlineKeyboardButton>> = create_inline_keyboard_rows(&callback_buttons, 2);
+    add_url_buttons(&mut keyboard, &url_buttons);
 
     InlineKeyboardMarkup::new(keyboard)
 }
@@ -96,25 +100,13 @@ fn home_keyboard() -> InlineKeyboardMarkup {
 async fn social_media_buttons() -> InlineKeyboardMarkup {
     let mut keyboard: Vec<Vec<InlineKeyboardButton>> = vec![];
 
-    let github_url = Url::parse("https://github.com/junque1r4").unwrap();
-    let linkedin_url = Url::parse("https://www.linkedin.com/in/joao-victor-junqueira-1b9114164/").unwrap();
-    let x_url = Url::parse("https://twitter.com/KRNJun").unwrap();
+    let url_buttons = vec![
+        ("Github", "https://github.com/junque1r4/rust-telegram-portifolio"),
+        ("Linkedin", "https://www.linkedin.com/in/joao-victor-junqueira-1b9114164/"),
+        ("X", "https://twitter.com/KRNJun"),
+    ];
 
-
-    keyboard.push(vec![InlineKeyboardButton::url(
-        "Github".to_owned(),
-        github_url,
-    )]);
-
-    keyboard.push(vec![InlineKeyboardButton::url(
-        "Linkedin".to_owned(),
-        linkedin_url,
-    )]);
-
-    keyboard.push(vec![InlineKeyboardButton::url(
-        "X".to_owned(),
-        x_url,
-    )]);
+    add_url_buttons(&mut keyboard, &url_buttons);
 
     let back_button = InlineKeyboardButton::callback("back", "back");
 
@@ -130,8 +122,8 @@ async fn message_handler(bot: Bot, msg: Message, me: Me, ) -> Result<(), Box<dyn
                 bot.send_message(msg.chat.id, Command::descriptions().to_string()).await?;
             }
             Ok(Command::Start) => {                
-                bot.send_message(msg.chat.id, "Welcome to my portifolio [ㅤ](https://www.jokesforfunny.com/wp-content/uploads/2021/06/0596bdb89b60fe771acd2f5972a9d3e3-1158x1536.jpg)")
-                    .parse_mode(ParseMode::Markdown)
+                bot.send_message(msg.chat.id, &CONFIG.home)
+                    .parse_mode(ParseMode::MarkdownV2)
                     .reply_markup(home_keyboard())
                     .await?;
                 }
@@ -150,7 +142,7 @@ async fn inline_query_handler(bot: Bot, q: InlineQuery, ) -> Result<(), Box<dyn 
     let choose_home_option = InlineQueryResultArticle::new(
         "0",
         "What info do you need?",
-        InputMessageContent::Text(InputMessageContentText::new("Welcome to my portifolio [ㅤ](https://www.jokesforfunny.com/wp-content/uploads/2021/06/0596bdb89b60fe771acd2f5972a9d3e3-1158x1536.jpg)").parse_mode(ParseMode::Markdown)),
+        InputMessageContent::Text(InputMessageContentText::new(&CONFIG.home).parse_mode(ParseMode::MarkdownV2)),
         
     )
     .reply_markup(home_keyboard());
@@ -219,7 +211,7 @@ async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Erro
                     .await?;
                 },
                 "back" => {
-                    bot.edit_message_text(chat.id, id, "Welcome to my portifolio [ㅤ](https://www.jokesforfunny.com/wp-content/uploads/2021/06/0596bdb89b60fe771acd2f5972a9d3e3-1158x1536.jpg)")
+                    bot.edit_message_text(chat.id, id, &CONFIG.home)
                         .parse_mode(ParseMode::Markdown)
                         .reply_markup(home_keyboard())
                         .await?;
