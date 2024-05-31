@@ -29,11 +29,10 @@ enum Command {
 struct Config {
     home: String,
     about_me: String,
-    welcome_message: String,
     social_media: String,
     jobs: String,
     skills: String,
-    github_bot_url: String,
+    alelo: String,
 }
 
 fn load_config() -> Config {
@@ -161,19 +160,11 @@ async fn back_button() -> InlineKeyboardMarkup {
 }
 
 async fn jobs_button() -> InlineKeyboardMarkup {
-    let mut keyboard: Vec<Vec<InlineKeyboardButton>> = vec![];
     let callback_buttons = [
         "Alelo", "Vivo", "Assaí", "Freelancers", "Back"
     ];
 
-    for buttons in callback_buttons.chunks(2) {
-        let row = buttons
-            .iter()
-            .map(| &button | InlineKeyboardButton::callback(button.to_owned(), button.to_owned()))
-            .collect();
-    
-        keyboard.push(row);
-    }
+    let keyboard: Vec<Vec<InlineKeyboardButton>> = create_inline_keyboard_rows(&callback_buttons, 2);
 
     InlineKeyboardMarkup::new(keyboard)
 }
@@ -203,38 +194,51 @@ async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Erro
         let config = load_config();
         bot.answer_callback_query(q.id).await?;
         if let Some(Message { id, chat, .. }) = q.message {
+            // Store and pass a vector to the match list.
             match option.to_lowercase().as_str() {
                 "about me" => {
                     bot.edit_message_text(chat.id, id, &CONFIG.about_me)
-                    .parse_mode(ParseMode::Markdown)
+                    .parse_mode(ParseMode::MarkdownV2)
                     .reply_markup( back_button().await )
                     .await?;
                 },
                 "back" => {
                     bot.edit_message_text(chat.id, id, &CONFIG.home)
-                        .parse_mode(ParseMode::Markdown)
+                        .parse_mode(ParseMode::MarkdownV2)
                         .reply_markup(home_keyboard())
                         .await?;
                 },
                 "social media" => {
                     bot.edit_message_text(chat.id, id, &config.social_media)
-                        .parse_mode(ParseMode::Markdown)
+                        .parse_mode(ParseMode::MarkdownV2)
                         .reply_markup(social_media_buttons().await)
                         .await?;
                 },
                 "jobs" => {
-                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each company!")
-                        .parse_mode(ParseMode::Markdown)
+                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each company")
+                        .parse_mode(ParseMode::MarkdownV2)
                         .reply_markup(jobs_button().await)
                         .await?;
                 },
                 "skills" => {
-                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each skill!")
-                        .parse_mode(ParseMode::Markdown)
+                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each skill")
+                        .parse_mode(ParseMode::MarkdownV2)
                         .reply_markup(skills_button().await)
                         .await?;
-                }
+                },
+                "rust" => {
+                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each skill")
+                        .parse_mode(ParseMode::MarkdownV2)
+                        .reply_markup(skills_button().await)
+                        .await?;
+                },
 
+                "alelo" => {
+                    bot.edit_message_text(chat.id, id, &CONFIG.alelo)
+                        .parse_mode(ParseMode::MarkdownV2)
+                        .reply_markup(back_button().await)
+                        .await?;
+                },
                 _ => {
                     bot.send_message(chat.id, text).await?;
                 }
