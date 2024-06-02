@@ -33,6 +33,7 @@ struct Config {
     jobs: String,
     skills: String,
     alelo: String,
+    vivo: String,
 }
 
 fn load_config() -> Config {
@@ -232,11 +233,16 @@ async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Erro
                         .reply_markup(skills_button().await)
                         .await?;
                 },
-
                 "alelo" => {
                     bot.edit_message_text(chat.id, id, &CONFIG.alelo)
                         .parse_mode(ParseMode::MarkdownV2)
-                        .reply_markup(back_button().await)
+                        .reply_markup(jobs_button().await)
+                        .await?;
+                },
+                "vivo" => {
+                    bot.edit_message_text(chat.id, id, &CONFIG.vivo)
+                        .parse_mode(ParseMode::MarkdownV2)
+                        .reply_markup(jobs_button().await)
                         .await?;
                 },
                 _ => {
