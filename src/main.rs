@@ -221,7 +221,7 @@ async fn callback_handler(bot: Bot, q: CallbackQuery) -> Result<(), Box<dyn Erro
                         .await?;
                 },
                 "skills" => {
-                    bot.edit_message_text(chat.id, id, "Each button will show you a little bit about my experience in each skill")
+                    bot.edit_message_text(chat.id, id, &CONFIG.skills)
                         .parse_mode(ParseMode::MarkdownV2)
                         .reply_markup(skills_button().await)
                         .await?;

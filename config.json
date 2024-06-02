@@ -3,7 +3,7 @@
   "about_me": "[\\u2800](https://avatars.githubusercontent.com/u/39351332?v=4)\nI\\'m a 24 years old Cybersecurity Analyst from Brazil\\. I\\'m currently working at [Alelo](https://www\\.alelo\\.com\\.br)\n\nI don\\'t have a degree because I quit in the last semester of my Computer Science course, because I was planning to move to another country\\. \\(Political and Economic reasons\\)\n\nI\\'m currently studying backend development in Rust\\! This bot was implemented using the [Teloxide](https://github\\.com/teloxide/teloxide) library and Rust\\!\n\nIf you want to know more about my skills you can select \\\"Skills\\\" in the main menu\\.",
   "social_media": "Social Media\\!\n\nFollow me on X, I\\'m trying to post some things\\! 🤝",
   "jobs": "Each button will show you a little bit about my experience in each company",
-  "skills": "rust",
+  "skills": "Each button will show you a little bit about my experience in each skill",
   "alelo": "Technologies used: *Kotlin*, *Swift*, *BurpSuite*, *Frida*, *Splunk*, *Veracode*, *AWS*\\. Implemented **Secure Software Development Life Cycle \\(SSDLC\\)** processes and performed comprehensive code reviews\\. Evaluated and mitigated security vulnerabilities\\. Conducted thorough screenings of previously identified vulnerabilities\\."
 }
 
